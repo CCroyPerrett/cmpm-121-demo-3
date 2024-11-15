@@ -76,3 +76,70 @@ reset.addEventListener('click', (event) => {
   points = [36.98949379578401, -122.06277128548504];
   reloadmap();
 });
+
+//const statusdiv = document.createElement("div"); mapdiv.id = "statusdiv";
+//document.body.append(statusdiv);
+
+//const status = document.createElement("h4"); mapdiv.id = "status";
+//document.body.append(status);
+
+// Display the player's points
+let collectedpoints = 0;
+const status = document.createElement("text"); 
+status.innerHTML = "\nYou have no points."; document.body.append(status);
+//const statusPanel = document.querySelector<HTMLDivElement>("#statusdiv")!; // element `statusPanel` is defined in index.html
+//status.innerHTML = "You have no points.";
+
+let areasize = 8;
+let tiledegrees = 1e-4;
+let spawnchance = 0.1;
+
+// Add caches to the map by cell numbers
+function spawnCache(i: number, j: number) {
+  const origin = leaflet.latLng(points[0], points[1]);
+  const bounds = leaflet.latLngBounds([
+    [origin.lat + i * tiledegrees, origin.lng + j * tiledegrees],
+    [origin.lat + (i + 1) * tiledegrees, origin.lng + (j + 1) * tiledegrees],
+  ]);
+
+
+  const rect = leaflet.rectangle(bounds);
+  rect.addTo(gamemap);
+
+  // Handle interactions with the cache
+  rect.bindPopup(() => {
+
+    let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+
+    // The popup offers a description and button
+    const popupDiv = document.createElement("div");
+    popupDiv.innerHTML = `
+                <div>There is a cache here at "${i},${j}". It has value <span id="value">${pointValue}</span>.</div>
+                <button id="poke">poke</button>`;
+
+    // Clicking the button decrements the cache's value and increments the player's points
+    popupDiv
+      .querySelector<HTMLButtonElement>("#poke")!
+      .addEventListener("click", () => {
+        if(pointValue > 0){
+
+        
+        pointValue--;
+        popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+          pointValue.toString();
+        collectedpoints++;
+        status.innerHTML = `You have ${collectedpoints} points!`;
+        }
+      });
+
+    return popupDiv;
+  });
+}
+
+for (let i = -areasize; i < areasize; i++) {
+  for (let j = -areasize; j < areasize; j++) {
+    if (luck([i, j].toString()) < spawnchance) {
+      spawnCache(i, j);
+    }
+  }
+}
