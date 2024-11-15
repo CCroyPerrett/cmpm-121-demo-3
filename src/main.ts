@@ -86,7 +86,7 @@ reset.addEventListener('click', (event) => {
 // Display the player's points
 let collectedpoints = 0;
 const status = document.createElement("text"); 
-status.innerHTML = "\nYou have no points."; document.body.append(status);
+status.innerHTML = "You have no points."; document.body.append(status);
 //const statusPanel = document.querySelector<HTMLDivElement>("#statusdiv")!; // element `statusPanel` is defined in index.html
 //status.innerHTML = "You have no points.";
 
@@ -115,7 +115,7 @@ function spawnCache(i: number, j: number) {
     const popupDiv = document.createElement("div");
     popupDiv.innerHTML = `
                 <div>There is a cache here at "${i},${j}". It has value <span id="value">${pointValue}</span>.</div>
-                <button id="poke">poke</button>`;
+                <button id="poke">poke</button><button id="deposit">deposit</button>`;
 
     // Clicking the button decrements the cache's value and increments the player's points
     popupDiv
@@ -123,13 +123,25 @@ function spawnCache(i: number, j: number) {
       .addEventListener("click", () => {
         if(pointValue > 0){
 
-        
-        pointValue--;
-        popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-          pointValue.toString();
-        collectedpoints++;
-        status.innerHTML = `You have ${collectedpoints} points!`;
-        }
+          pointValue--;
+          popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+            pointValue.toString();
+          collectedpoints++;
+          status.innerHTML = `You have ${collectedpoints} points!`;
+          }
+      });
+
+      popupDiv
+      .querySelector<HTMLButtonElement>("#deposit")!
+      .addEventListener("click", () => {
+        if(collectedpoints > 0){
+
+          pointValue++;
+          popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+            pointValue.toString();
+          collectedpoints--;
+          status.innerHTML = `You have ${collectedpoints} points!`;
+          }
       });
 
     return popupDiv;
