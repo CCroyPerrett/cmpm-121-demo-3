@@ -68,6 +68,7 @@ const gamemap = leaflet.map(document.getElementById("map")!,{
   zoom:19, center: playerpos,
   scrollWheelZoom: false, zoomControl:false}
 );
+gamemap.dragging.disable();
 
 leaflet
   .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -164,7 +165,7 @@ function spawnCache(i: number, j: number) {
     let thiscache = getCache(i_value, j_value);
     const popupDiv = document.createElement("div");
     popupDiv.innerHTML = `
-                <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has value <span id="value">${ (pointValue)}</span>.</div>
+                <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has <span id="value">${ (pointValue)}</span> coins.</div>
                 <button id="poke">poke</button><button id="deposit">deposit</button><button id="cachescoins">show cache's coins</button>`;
 
 
