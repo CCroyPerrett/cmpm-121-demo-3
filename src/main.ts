@@ -13,6 +13,51 @@ import "./leafletWorkaround.ts";
 import luck from "./luck.ts";
 //L.imageOverlay();
 
+interface Coin {
+  i: number
+  j: number
+  serial: number
+}
+
+interface Cache {
+  i: number
+  j: number
+  coins: Coin[]
+}
+
+let Classroom = {i: 369894, j: -1220627};
+let printRecord:Coin[] = [];
+let playersCoins:Coin[] = [];
+let cacheCoins:Cache[] = [];
+
+function PrintCoin(i_: number, j_: number){
+  const newCoin:Coin = {
+    i: i_,
+    j: j_,
+    serial: 0
+  }
+
+  let no_match = true;
+  for(let k = 0; k < printRecord.length; k++){
+    if(printRecord[k].j == j_ && printRecord[k].i == i_){
+      newCoin.serial = printRecord[k].serial;
+      printRecord[k].serial++;
+      no_match = false;
+      break;
+    }
+  }
+  if(no_match){
+    const recordCoin:Coin = {
+      i: i_,
+      j: j_,
+      serial: 1
+    }
+    printRecord.push(recordCoin);
+  }
+
+  return newCoin;
+}
+
 const mapdiv = document.createElement("div"); mapdiv.id = "map";
 document.body.append(mapdiv);
 
@@ -101,47 +146,66 @@ function spawnCache(i: number, j: number) {
     [origin.lat + i * tiledegrees, origin.lng + j * tiledegrees],
     [origin.lat + (i + 1) * tiledegrees, origin.lng + (j + 1) * tiledegrees],
   ]);
+  //console.log("i is: " + i + ", j is: " + j);
 
-
+  let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+  let cache:Cache = {i:i + Classroom.i, j:j + Classroom.j, coins: [] };
+    for(let k =  pointValue -1; k >= 0; k--){
+      cache.coins.push({i:i + Classroom.i, j:j + Classroom.j, serial: k});
+    }
+    cacheCoins.push(cache);
+  
+  const i_value = i + Classroom.i; const j_value = j + Classroom.j;
   const rect = leaflet.rectangle(bounds);
   rect.addTo(gamemap);
+  
 
   // Handle interactions with the cache
   rect.bindPopup(() => {
-
-    let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
-
+    //let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
     // The popup offers a description and button
+    let thiscache = getCache(i_value, j_value);
     const popupDiv = document.createElement("div");
     popupDiv.innerHTML = `
-                <div>There is a cache here at "${i},${j}". It has value <span id="value">${pointValue}</span>.</div>
+                <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has value <span id="value">${ (pointValue)}</span>.</div>
                 <button id="poke">poke</button><button id="deposit">deposit</button>`;
 
     // Clicking the button decrements the cache's value and increments the player's points
     popupDiv
       .querySelector<HTMLButtonElement>("#poke")!
       .addEventListener("click", () => {
-        if(pointValue > 0){
-
-          pointValue--;
-          popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-            pointValue.toString();
-          collectedpoints++;
-          status.innerHTML = `You have ${collectedpoints} points!`;
-          }
+        //console.log("i is: " + i_value + ", j is: " + j_value);
+        let thiscache = getCache(i_value, j_value);
+        if(thiscache != null){
+          if(thiscache.coins.length > 0){
+  
+            let topcoin = thiscache.coins.pop(); pointValue--;
+            popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+            (pointValue).toString();
+              if(topcoin != undefined){playersCoins.push(topcoin)}; collectedpoints++;
+            //status.innerHTML = `You have ${playersCoins.length} points!`;
+            status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+            }
+        }
+        
       });
 
       popupDiv
       .querySelector<HTMLButtonElement>("#deposit")!
       .addEventListener("click", () => {
-        if(collectedpoints > 0){
+        let thiscache = getCache(i_value, j_value);
+        if(thiscache != null){
+          if(playersCoins.length > 0){
 
-          pointValue++;
-          popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-            pointValue.toString();
-          collectedpoints--;
-          status.innerHTML = `You have ${collectedpoints} points!`;
-          }
+            let topcoin = playersCoins.pop();  pointValue++; collectedpoints--;
+            popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+            (pointValue).toString();
+            if(topcoin != undefined){thiscache.coins.push(topcoin);};//pointValue++;};
+            //status.innerHTML = `You have ${playersCoins.length} points!`;
+            status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+            }
+        }
+        
       });
 
     return popupDiv;
@@ -155,3 +219,23 @@ for (let i = -areasize; i < areasize; i++) {
     }
   }
 }
+
+function getCache(i:number, j:number){
+  for(let k = 0; cacheCoins.length; k++){
+    if(cacheCoins[k].j == j && cacheCoins[k].i == i){
+      return cacheCoins[k];
+    }
+  }
+  return null;
+}
+
+function TextCoins(coins:Coin[]){
+  let str = "";
+  for(let i = 0; i < coins.length; i++){
+    str = str + "(i: " + coins[i].i + ", j: " + coins[i].j + ", serial: "
+    + coins[i].serial + "), ";
+  }
+  return str;
+}
+
+
