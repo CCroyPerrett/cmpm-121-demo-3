@@ -122,31 +122,31 @@ reset.addEventListener('click', (event) => {
   reloadmap();
 });
 
-//const statusdiv = document.createElement("div"); mapdiv.id = "statusdiv";
-//document.body.append(statusdiv);
+const showcoins = document.createElement("button"); 
+showcoins.innerHTML = "show your coins"; document.body.append(showcoins);
+showcoins.addEventListener('click', (event) => {
+  showcachecoins = false;
+  showplayercoins = true;
+});
 
-//const status = document.createElement("h4"); mapdiv.id = "status";
-//document.body.append(status);
 
-// Display the player's points
 let collectedpoints = 0;
 const status = document.createElement("text"); 
-status.innerHTML = "You have no points."; document.body.append(status);
-//const statusPanel = document.querySelector<HTMLDivElement>("#statusdiv")!; // element `statusPanel` is defined in index.html
-//status.innerHTML = "You have no points.";
+status.innerHTML = "You have no coins."; document.body.append(status);
+let showplayercoins = true; let showcachecoins = false;
+
 
 let areasize = 8;
 let tiledegrees = 1e-4;
 let spawnchance = 0.1;
 
-// Add caches to the map by cell numbers
+
 function spawnCache(i: number, j: number) {
   const origin = leaflet.latLng(points[0], points[1]);
   const bounds = leaflet.latLngBounds([
     [origin.lat + i * tiledegrees, origin.lng + j * tiledegrees],
     [origin.lat + (i + 1) * tiledegrees, origin.lng + (j + 1) * tiledegrees],
   ]);
-  //console.log("i is: " + i + ", j is: " + j);
 
   let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
   let cache:Cache = {i:i + Classroom.i, j:j + Classroom.j, coins: [] };
@@ -160,21 +160,18 @@ function spawnCache(i: number, j: number) {
   rect.addTo(gamemap);
   
 
-  // Handle interactions with the cache
   rect.bindPopup(() => {
-    //let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
-    // The popup offers a description and button
     let thiscache = getCache(i_value, j_value);
     const popupDiv = document.createElement("div");
     popupDiv.innerHTML = `
                 <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has value <span id="value">${ (pointValue)}</span>.</div>
-                <button id="poke">poke</button><button id="deposit">deposit</button>`;
+                <button id="poke">poke</button><button id="deposit">deposit</button><button id="cachescoins">show cache's coins</button>`;
 
-    // Clicking the button decrements the cache's value and increments the player's points
+
     popupDiv
       .querySelector<HTMLButtonElement>("#poke")!
       .addEventListener("click", () => {
-        //console.log("i is: " + i_value + ", j is: " + j_value);
+
         let thiscache = getCache(i_value, j_value);
         if(thiscache != null){
           if(thiscache.coins.length > 0){
@@ -183,8 +180,12 @@ function spawnCache(i: number, j: number) {
             popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
             (pointValue).toString();
               if(topcoin != undefined){playersCoins.push(topcoin)}; collectedpoints++;
-            //status.innerHTML = `You have ${playersCoins.length} points!`;
-            status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+            if(showplayercoins){
+              status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+            }
+            else{
+              status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
+            }
             }
         }
         
@@ -200,10 +201,27 @@ function spawnCache(i: number, j: number) {
             let topcoin = playersCoins.pop();  pointValue++; collectedpoints--;
             popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
             (pointValue).toString();
-            if(topcoin != undefined){thiscache.coins.push(topcoin);};//pointValue++;};
-            //status.innerHTML = `You have ${playersCoins.length} points!`;
-            status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+            if(topcoin != undefined){thiscache.coins.push(topcoin);};
+            if(showplayercoins){
+              status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
             }
+            else{
+              status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
+            }
+            
+            }
+        }
+        
+      });
+
+      popupDiv
+      .querySelector<HTMLButtonElement>("#cachescoins")!
+      .addEventListener("click", () => {
+        let thiscache = getCache(i_value, j_value);
+        if(thiscache != null){
+
+            status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
+            showplayercoins = false; showcachecoins = true;
         }
         
       });
