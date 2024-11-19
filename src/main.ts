@@ -145,10 +145,16 @@ returntostart.addEventListener('click', (event) => {
 });
 
 const displaypayercoins = document.createElement("button"); 
-displaypayercoins.innerHTML = "show player coins"; document.body.append(displaypayercoins);
+displaypayercoins.innerHTML = "show/hide player coins"; document.body.append(displaypayercoins);
 displaypayercoins.addEventListener('click', (event) => {
-  showcachecoins = false; showplayercoins = true;
-  status.innerHTML = `Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
+  if(showplayercoins == false){
+    showcachecoins = false; showplayercoins = true;
+    status.innerHTML = `Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
+  }
+  else{
+    showcachecoins = false; showplayercoins = false;
+    status.innerHTML = '';
+  }
 });
 
 let tracklocation = false;
@@ -272,7 +278,7 @@ function spawnCache(i: number, j: number) {
             if(showplayercoins){
               status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
             }
-            else{
+            else if(showcachecoins){
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
@@ -296,7 +302,7 @@ function spawnCache(i: number, j: number) {
             if(showplayercoins){
               status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
             }
-            else{
+            else if(showcachecoins){
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
