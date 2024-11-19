@@ -30,6 +30,15 @@ let printRecord:Coin[] = [];
 let playersCoins:Coin[] = [];
 let cacheCoins:Cache[] = [];
 
+//loads keys from memory
+const pcoins = localStorage.getItem("playerscoins");
+console.log("pcoins are " + pcoins);
+if(pcoins != null){
+  playersCoins = JSON.parse(pcoins);
+}
+  //return data ? JSON.parse(data) : null;
+localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
+
 function PrintCoin(i_: number, j_: number){
   const newCoin:Coin = {
     i: i_,
@@ -159,7 +168,7 @@ worldupdate.addEventListener('click', (event) => {
 
 let collectedpoints = 0;
 const status = document.createElement("text"); 
-status.innerHTML = "You have no coins."; document.body.append(status);
+status.innerHTML = `Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
 let showplayercoins = true; let showcachecoins = false;
 
 
@@ -213,6 +222,7 @@ function spawnCache(i: number, j: number) {
             else{
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
+            localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
             }
         }
         
@@ -235,7 +245,7 @@ function spawnCache(i: number, j: number) {
             else{
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
-            
+            localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
             }
         }
         
