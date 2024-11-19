@@ -1,6 +1,6 @@
 //import {imageOverlay, map,  tileLayer, MapOptions, latLng} from "npm:@types/leaflet@^1.9.14";
 // @deno-types="npm:@types/leaflet@^1.9.14"
-import leaflet from "leaflet";
+import leaflet, { LatLng } from "leaflet";
 
 // Style sheets
 import "leaflet/dist/leaflet.css";
@@ -91,6 +91,7 @@ const up = document.createElement("button");
 up.innerHTML = "↑"; document.body.append(up);
 up.addEventListener('click', (event) => {
   points[0] += 0.0001;
+  updatePolyline(points[0], points[1]);
   reloadmap();
 });
 
@@ -98,6 +99,7 @@ const down = document.createElement("button");
 down.innerHTML = "↓"; document.body.append(down);
 down.addEventListener('click', (event) => {
   points[0] -= 0.0001;
+  updatePolyline(points[0], points[1]);
   reloadmap();
 });
 
@@ -105,6 +107,7 @@ const left = document.createElement("button");
 left.innerHTML = "←"; document.body.append(left);
 left.addEventListener('click', (event) => {
   points[1] -= 0.0001;
+  updatePolyline(points[0], points[1]);
   reloadmap();
 });
 
@@ -112,22 +115,45 @@ const right = document.createElement("button");
 right.innerHTML = "→"; document.body.append(right);
 right.addEventListener('click', (event) => {
   points[1] += 0.0001;
+  updatePolyline(points[0], points[1]);
   reloadmap();
 });
 
 const reset = document.createElement("button"); 
 reset.innerHTML = "reset"; document.body.append(reset);
 reset.addEventListener('click', (event) => {
-  points[1] += 0.0001;
+  let sign = prompt("are you sure you want to reset?", "yes");
+  if(sign != null){
+    points[1] += 0.0001;
   points = [36.98949379578401, -122.06277128548504];
   reloadmap();
+  polyline.setLatLngs([leaflet.latLng(points[0], points[1])]);
+  }
 });
 
-const showcoins = document.createElement("button"); 
-showcoins.innerHTML = "show your coins"; document.body.append(showcoins);
-showcoins.addEventListener('click', (event) => {
-  showcachecoins = false;
-  showplayercoins = true;
+let tracklocation = false;
+const worldupdate = document.createElement("button"); 
+worldupdate.innerHTML = "🌐"; document.body.append(worldupdate);
+worldupdate.addEventListener('click', (event) => {
+  tracklocation = !tracklocation;
+   navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      //console.log("Latitude:", latitude);
+      //console.log("Longitude:", longitude);
+
+      points = [latitude, longitude];
+      polyline.setLatLngs([leaflet.latLng(points[0], points[1])]);
+      tracklocation = false;
+      reloadmap();
+    },
+    (error) => {
+      console.error("Error getting location:", error);
+    }
+  )
+  
 });
 
 
@@ -257,4 +283,14 @@ function TextCoins(coins:Coin[]){
   return str;
 }
 
+//impliments polyline
+var latlngs:LatLng[] = [
+  leaflet.latLng(points[0], points[1]),
+];
 
+var polyline = leaflet.polyline(latlngs, {color: 'red'}).addTo(gamemap);
+//gamemap.fitBounds(polyline.getBounds());
+function updatePolyline(i:number, j:number){
+  polyline.addLatLng(leaflet.latLng(points[0], points[1]))
+  //polyline.addTo(gamemap);
+}
