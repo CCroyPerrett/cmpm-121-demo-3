@@ -32,12 +32,16 @@ let cacheCoins:Cache[] = [];
 
 //loads keys from memory
 const pcoins = localStorage.getItem("playerscoins");
-console.log("pcoins are " + pcoins);
 if(pcoins != null){
   playersCoins = JSON.parse(pcoins);
 }
-  //return data ? JSON.parse(data) : null;
 localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
+
+const ccoins = localStorage.getItem("cachecoins");
+if(ccoins != null){
+  cacheCoins = JSON.parse(ccoins);
+}
+localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
 
 function PrintCoin(i_: number, j_: number){
   const newCoin:Coin = {
@@ -128,16 +132,24 @@ right.addEventListener('click', (event) => {
   reloadmap();
 });
 
+
 const reset = document.createElement("button"); 
-reset.innerHTML = "reset"; document.body.append(reset);
+reset.innerHTML = "return to start"; document.body.append(reset);
 reset.addEventListener('click', (event) => {
-  let sign = prompt("are you sure you want to reset?", "yes");
+  let sign = prompt("are you sure you want to return to start?", "yes");
   if(sign != null){
     points[1] += 0.0001;
   points = [36.98949379578401, -122.06277128548504];
   reloadmap();
   polyline.setLatLngs([leaflet.latLng(points[0], points[1])]);
   }
+});
+
+const displaypayercoins = document.createElement("button"); 
+displaypayercoins.innerHTML = "show player coins"; document.body.append(displaypayercoins);
+displaypayercoins.addEventListener('click', (event) => {
+  showcachecoins = false; showplayercoins = true;
+  status.innerHTML = `Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
 });
 
 let tracklocation = false;
@@ -184,12 +196,20 @@ function spawnCache(i: number, j: number) {
     [origin.lat + (i + 1) * tiledegrees, origin.lng + (j + 1) * tiledegrees],
   ]);
 
-  let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
-  let cache:Cache = {i:i + Classroom.i, j:j + Classroom.j, coins: [] };
-    for(let k =  pointValue -1; k >= 0; k--){
-      cache.coins.push({i:i + Classroom.i, j:j + Classroom.j, serial: k});
-    }
-    cacheCoins.push(cache);
+
+    let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
+    //if(getCache(i,j) == null){
+    let cache:Cache = {i:i + Classroom.i, j:j + Classroom.j, coins: [] };
+      for(let k =  pointValue -1; k >= 0; k--){
+        cache.coins.push({i:i + Classroom.i, j:j + Classroom.j, serial: k});
+      }
+      
+      if(getCache(i + Classroom.i,j + Classroom.j) != null){
+        console.log("getcache is null")
+        cacheCoins.push(cache);
+      }
+    //}
+
   
   const i_value = i + Classroom.i; const j_value = j + Classroom.j;
   const rect = leaflet.rectangle(bounds);
@@ -200,7 +220,7 @@ function spawnCache(i: number, j: number) {
     let thiscache = getCache(i_value, j_value);
     const popupDiv = document.createElement("div");
     popupDiv.innerHTML = `
-                <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has <span id="value">${ (pointValue)}</span> coins.</div>
+                <div>There is a cache here at "${i + Classroom.i},${Classroom.j}". It has <span id="value">${ thiscache?.coins.length}</span> coins.</div>
                 <button id="poke">poke</button><button id="deposit">deposit</button><button id="cachescoins">show cache's coins</button>`;
 
 
@@ -214,7 +234,7 @@ function spawnCache(i: number, j: number) {
   
             let topcoin = thiscache.coins.pop(); pointValue--;
             popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-            (pointValue).toString();
+            (thiscache.coins.length).toString();
               if(topcoin != undefined){playersCoins.push(topcoin)}; collectedpoints++;
             if(showplayercoins){
               status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
@@ -223,6 +243,7 @@ function spawnCache(i: number, j: number) {
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
+            localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
             }
         }
         
@@ -236,9 +257,9 @@ function spawnCache(i: number, j: number) {
           if(playersCoins.length > 0){
 
             let topcoin = playersCoins.pop();  pointValue++; collectedpoints--;
-            popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
-            (pointValue).toString();
             if(topcoin != undefined){thiscache.coins.push(topcoin);};
+            popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
+            (thiscache.coins.length).toString();
             if(showplayercoins){
               status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
             }
@@ -246,6 +267,7 @@ function spawnCache(i: number, j: number) {
               status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
+            localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
             }
         }
         
@@ -276,7 +298,8 @@ for (let i = -areasize; i < areasize; i++) {
 }
 
 function getCache(i:number, j:number){
-  for(let k = 0; cacheCoins.length; k++){
+  for(let k = 0; k < cacheCoins.length; k++){
+    //console.log("j is: " + j);
     if(cacheCoins[k].j == j && cacheCoins[k].i == i){
       return cacheCoins[k];
     }
