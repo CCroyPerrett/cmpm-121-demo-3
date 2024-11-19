@@ -192,13 +192,13 @@ worldupdate.addEventListener('click', (event) => {
 const reset = document.createElement("button"); 
 reset.innerHTML = "🚮"; document.body.append(reset);
 reset.addEventListener('click', (event) => {
-  let sign = prompt("are you sure you want to resett?", "yes");
+  let sign = prompt("<br>are you sure you want to resett?", "yes");
   if(sign != null){
   playersCoins = []; localStorage.removeItem("playerscoins");
   cacheCoins = []; localStorage.removeItem("cachecoins");
   stepsRight = 0; stepsUp = 0;
   spawnCaches();
-  status.innerHTML = `This cache's coins are: ` + TextCoins(playersCoins);
+  status.innerHTML = `<br>This cache's coins are: ` + TextCoins(playersCoins);
   }
 });
 
@@ -206,7 +206,7 @@ reset.addEventListener('click', (event) => {
 
 let collectedpoints = 0;
 const status = document.createElement("text"); 
-status.innerHTML = `Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
+status.innerHTML = `<br>Your coins are: ` + TextCoins(playersCoins); document.body.append(status);
 let showplayercoins = true; let showcachecoins = false;
 
 
@@ -276,10 +276,10 @@ function spawnCache(i: number, j: number) {
             (thiscache.coins.length).toString();
               if(topcoin != undefined){playersCoins.push(topcoin)}; collectedpoints++;
             if(showplayercoins){
-              status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+              status.innerHTML = `<br>Your coins are: ` + TextCoins(playersCoins);
             }
             else if(showcachecoins){
-              status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
+              status.innerHTML = `<br>This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
             localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
@@ -300,10 +300,10 @@ function spawnCache(i: number, j: number) {
             popupDiv.querySelector<HTMLSpanElement>("#value")!.innerHTML =
             (thiscache.coins.length).toString();
             if(showplayercoins){
-              status.innerHTML = `Your coins are: ` + TextCoins(playersCoins);
+              status.innerHTML = `<br>Your coins are: ` + TextCoins(playersCoins);
             }
             else if(showcachecoins){
-              status.innerHTML = `This cache's coins are: ` + TextCoins(thiscache.coins);
+              status.innerHTML = `<br>This cache's coins are: ` + TextCoins(thiscache.coins);
             }
             localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
             localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
