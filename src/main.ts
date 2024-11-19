@@ -11,7 +11,7 @@ import "./leafletWorkaround.ts";
 
 // Deterministic random number generator
 import luck from "./luck.ts";
-//L.imageOverlay();
+
 
 interface Coin {
   i: number
@@ -29,19 +29,6 @@ let Classroom = {i: 369894, j: -1220627};
 let printRecord:Coin[] = [];
 let playersCoins:Coin[] = [];
 let cacheCoins:Cache[] = [];
-
-//loads keys from memory
-const pcoins = localStorage.getItem("playerscoins");
-if(pcoins != null){
-  playersCoins = JSON.parse(pcoins);
-}
-localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
-
-const ccoins = localStorage.getItem("cachecoins");
-if(ccoins != null){
-  cacheCoins = JSON.parse(ccoins);
-}
-localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
 
 function PrintCoin(i_: number, j_: number){
   const newCoin:Coin = {
@@ -133,12 +120,11 @@ right.addEventListener('click', (event) => {
 });
 
 
-const reset = document.createElement("button"); 
-reset.innerHTML = "return to start"; document.body.append(reset);
-reset.addEventListener('click', (event) => {
+const returntostart = document.createElement("button"); 
+returntostart.innerHTML = "return to start"; document.body.append(returntostart);
+returntostart.addEventListener('click', (event) => {
   let sign = prompt("are you sure you want to return to start?", "yes");
   if(sign != null){
-    points[1] += 0.0001;
   points = [36.98949379578401, -122.06277128548504];
   reloadmap();
   polyline.setLatLngs([leaflet.latLng(points[0], points[1])]);
@@ -162,9 +148,6 @@ worldupdate.addEventListener('click', (event) => {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
 
-      //console.log("Latitude:", latitude);
-      //console.log("Longitude:", longitude);
-
       points = [latitude, longitude];
       polyline.setLatLngs([leaflet.latLng(points[0], points[1])]);
       tracklocation = false;
@@ -176,6 +159,19 @@ worldupdate.addEventListener('click', (event) => {
   )
   
 });
+
+const reset = document.createElement("button"); 
+reset.innerHTML = "🚮"; document.body.append(reset);
+reset.addEventListener('click', (event) => {
+  let sign = prompt("are you sure you want to resett?", "yes");
+  if(sign != null){
+  playersCoins = []; localStorage.removeItem("playerscoins");
+  cacheCoins = []; localStorage.removeItem("cachecoins");
+  spawnCaches();
+  status.innerHTML = `This cache's coins are: ` + TextCoins(playersCoins);
+  }
+});
+
 
 
 let collectedpoints = 0;
@@ -198,19 +194,16 @@ function spawnCache(i: number, j: number) {
 
 
     let pointValue = Math.floor(luck([i, j, "initialValue"].toString()) * 100);
-    //if(getCache(i,j) == null){
     let cache:Cache = {i:i + Classroom.i, j:j + Classroom.j, coins: [] };
       for(let k =  pointValue -1; k >= 0; k--){
         cache.coins.push({i:i + Classroom.i, j:j + Classroom.j, serial: k});
       }
       
-      if(getCache(i + Classroom.i,j + Classroom.j) != null){
-        console.log("getcache is null")
+
+      if(getCache(i + Classroom.i,j + Classroom.j) == null){
         cacheCoins.push(cache);
       }
-    //}
 
-  
   const i_value = i + Classroom.i; const j_value = j + Classroom.j;
   const rect = leaflet.rectangle(bounds);
   rect.addTo(gamemap);
@@ -289,17 +282,33 @@ function spawnCache(i: number, j: number) {
   });
 }
 
-for (let i = -areasize; i < areasize; i++) {
-  for (let j = -areasize; j < areasize; j++) {
-    if (luck([i, j].toString()) < spawnchance) {
-      spawnCache(i, j);
+function spawnCaches(){
+//loads keys from memory
+const pcoins = localStorage.getItem("playerscoins");
+if(pcoins != null){
+  playersCoins = JSON.parse(pcoins);
+}
+
+localStorage.setItem("playerscoins", JSON.stringify(playersCoins));
+
+const ccoins = localStorage.getItem("cachecoins");
+if(ccoins != null){
+  cacheCoins = JSON.parse(ccoins);
+}
+localStorage.setItem("cachecoins", JSON.stringify(cacheCoins));
+
+  for (let i = -areasize; i < areasize; i++) {
+    for (let j = -areasize; j < areasize; j++) {
+      if (luck([i, j].toString()) < spawnchance) {
+        spawnCache(i, j);
+      }
     }
   }
 }
+spawnCaches();
 
 function getCache(i:number, j:number){
   for(let k = 0; k < cacheCoins.length; k++){
-    //console.log("j is: " + j);
     if(cacheCoins[k].j == j && cacheCoins[k].i == i){
       return cacheCoins[k];
     }
@@ -316,14 +325,12 @@ function TextCoins(coins:Coin[]){
   return str;
 }
 
-//impliments polyline
+
 var latlngs:LatLng[] = [
   leaflet.latLng(points[0], points[1]),
 ];
 
-var polyline = leaflet.polyline(latlngs, {color: 'red'}).addTo(gamemap);
-//gamemap.fitBounds(polyline.getBounds());
+var polyline = leaflet.polyline(latlngs, {color: 'purple'}).addTo(gamemap);
 function updatePolyline(i:number, j:number){
   polyline.addLatLng(leaflet.latLng(points[0], points[1]))
-  //polyline.addTo(gamemap);
 }
